@@ -17,7 +17,10 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 package cmd
 
 import (
+	"fmt"
 	"os"
+
+	"github.com/mosalter/testlab/vxi11"
 	"github.com/spf13/cobra"
 )
 
@@ -51,4 +54,32 @@ func init() {
 	// Here you will define your flags and configuration settings.
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
+	rootCmd.AddCommand(showPortsCmd)
+	rootCmd.AddCommand(testCmd)
+}
+
+var showPortsCmd = &cobra.Command{
+	Use:           "showports <host>",
+	Short:         "Show VXI11 ports for given host",
+	SilenceUsage:  true,
+	SilenceErrors: true,
+
+	RunE: func(cmd *cobra.Command, args []string) (err error) {
+		ports, err := vxi11.FindPorts(args[0])
+		if err == nil {
+			fmt.Printf("Core: %d, Abort: %d, IRQ: %d\n", ports[0], ports[1], ports[2])
+		}
+		return err
+	},
+}
+
+var testCmd = &cobra.Command{
+	Use:           "test <host>",
+	Short:         "devel-only testing",
+	SilenceUsage:  true,
+	SilenceErrors: false,
+
+	RunE: func(cmd *cobra.Command, args []string) (err error) {
+		return vxi11.DoTest(args)
+	},
 }
